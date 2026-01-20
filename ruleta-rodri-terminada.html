@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ruleta de Asistencia</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    h1 { margin-bottom: 0.2rem; text-align: center; }
+    p { margin-top: 0; margin-bottom: 1rem; text-align: center; }
+
+    .wheel-container {
+      position: relative;
+      width: 350px;
+      height: 350px;
+      margin-bottom: 1.5rem;
+    }
+
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 8px solid #333;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+      /* CASI TODO VERDE + UNA FRANJA ROJA PEQUEÑA (5°) */
+      background-image: conic-gradient(
+        #2ecc71 0deg 175deg,
+        #e74c3c 175deg 180deg,  /* FRANJA ROJA MUY PEQUEÑA */
+        #2ecc71 180deg 360deg
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 5s cubic-bezier(0.25, 0, 0.3, 1);
+    }
+
+    .center-circle {
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      background: #111;
+      border: 5px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 30px solid #f1c40f;
+      filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.8));
+    }
+
+    button {
+      padding: 0.8rem 1.5rem;
+      font-size: 1.1rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: #fff;
+      font-weight: bold;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    button:active { transform: translateY(3px); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6); }
+    button:disabled { opacity: 0.5; cursor: default; }
+
+    .resultado {
+      margin-top: 1.5rem;
+      min-height: 2.5rem;
+      font-size: 1.2rem;
+      text-align: center;
+      white-space: pre-line;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>¿Hoy va Rodri a entrenar?</h1>
+  <p>Pulsa la ruleta y que el azar decida</p>
+
+  <div class="wheel-container">
+    <div class="pointer"></div>
+    <div class="wheel" id="wheel">
+      <div class="center-circle">¡GIRA!</div>
+    </div>
+  </div>
+
+  <button id="spinBtn">🔄 GIRAR RULETA</button>
+
+  <div class="resultado" id="resultado"></div>
+
+  <script>
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spinBtn");
+    const resultado = document.getElementById("resultado");
+
+    let rotacionActual = 0;
+
+    // 80% NO IR, 20% IR (FRANJA ROJA = NO IR)
+    function sorteoTrucado() {
+      return Math.random() < 0.8 ? "NO_IR" : "IR";
+    }
+
+    function girarRuleta() {
+      spinBtn.disabled = true;
+      resultado.textContent = "¡GIRANDO...!";
+
+      const resultadoReal = sorteoTrucado();
+
+      // FRANJA ROJA: 175-180° (NO IR), resto VERDE (IR)
+      let anguloObjetivo;
+      if (resultadoReal === "NO_IR") {
+        anguloObjetivo = 175 + Math.random() * 5; // Dentro de la franja roja
+      } else {
+        anguloObjetivo = Math.random() * 360; // Cualquier verde (no la roja)
+        while (anguloObjetivo >= 175 && anguloObjetivo <= 180) {
+          anguloObjetivo = Math.random() * 360; // Evita roja
+        }
+      }
+
+      const vueltas = 6 + Math.floor(Math.random() * 4);
+      rotacionActual = (rotacionActual % 360) + 360 * vueltas + anguloObjetivo;
+      
+      wheel.style.transform = `rotate(${rotacionActual}deg)`;
+
+      setTimeout(() => {
+        if (resultadoReal === "IR") {
+          resultado.innerHTML = "🎉 <span style='color:#2ecc71'>¡MILAGRO!</span><br>Rodri IRÁ hoy.";
+        } else {
+          resultado.innerHTML = "😂 <span style='color:#e74c3c'>¡CLÁSICO!</span><br>Rodri NO IRÁ.";
+        }
+        spinBtn.disabled = false;
+      }, 5500);
+    }
+
+    spinBtn.addEventListener("click", girarRuleta);
+  </script>
+</body>
+</html>
+
+
+
+
+
